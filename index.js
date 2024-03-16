@@ -1,7 +1,11 @@
 import express from 'express';
+import dotenv from 'dotenv';
+import bcrypt from 'bcryptjs';
 
-const port = 4000;
+dotenv.config();
+
 const app = express();
+const port = process.env.PORT || 3000;
 app.use(express.json());
 
 const database = {
@@ -29,25 +33,42 @@ app.get('/', (req, res) => {
   res.send('success');
 });
 
-app.post('/signin', (req, res) => {
-  if (req.body.email === database.users[0].email && req.body.password === database.users[0].password) {
-    res.json('success');
-  } else {
-    res.status(400).json('error logging in');
+app.post('/signin', async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const user = database.users.find((user) => user.email === email); // Find the user in the database by email
+    if (!user) {
+      return res.status(400).json('User not found');
+    }
+    // Compare the provided password with the hashed password stored in the database
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (passwordMatch) {
+      res.json('success'); // Passwords match, user authenticated
+    } else {
+      res.status(400).json('Incorrect password'); // Passwords don't match, authentication failed
+    }
+  } catch (error) {
+    res.status(500).json('Internal server error');
   }
 });
 
-app.post('/register', (req, res) => {
+app.post('/register', async (req, res) => {
   const { email, name, password } = req.body;
-  database.users.push({
-    id: '125',
-    name: name,
-    email: email,
-    password: password,
-    entries: 0,
-    joined: new Date(),
-  });
-  res.json(database.users[database.users.length - 1]);
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = {
+      id: '125',
+      name: name,
+      email: email,
+      password: hashedPassword,
+      entries: 0,
+      joined: new Date(),
+    };
+    database.users.push(newUser);
+    res.json(newUser);
+  } catch (error) {
+    res.status(500).json('Internal server error');
+  }
 });
 
 app.get('/profile/:id', (req, res) => {
