@@ -2,6 +2,7 @@ import cors from 'cors';
 import express from 'express';
 import dotenv from 'dotenv';
 import bcrypt from 'bcryptjs';
+import knex from 'knex';
 
 dotenv.config();
 
@@ -9,6 +10,17 @@ const app = express();
 const port = process.env.PORT || 3000;
 app.use(express.json());
 app.use(cors());
+
+const db = knex({
+  client: 'pg',
+  connection: {
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    port: process.env.DB_PORT,
+    database: process.env.DB_NAME,
+    password: process.env.DB_PASSWORD,
+  },
+});
 
 const database = {
   users: [
