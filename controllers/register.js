@@ -1,6 +1,8 @@
 export const handleRegister = async (req, res, db, bcrypt) => {
   const { email, name, password } = req.body;
-
+  if (!email || !name || !password) {
+    return res.status(400).json('incorrect form submission');
+  }
   const hash = await bcrypt.hash(password, 10);
   db.transaction((trx) => {
     trx
