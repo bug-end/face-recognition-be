@@ -1,12 +1,14 @@
+import dotenv from 'dotenv';
 import { ClarifaiStub, grpc } from 'clarifai-nodejs-grpc';
 
+dotenv.config();
+
 const stub = ClarifaiStub.grpc();
+const metadata = new grpc.Metadata();
+metadata.set('authorization', `Key ${process.env.CLARIFAI_PAT}`);
 
 export const handleApiCall = (req, res) => {
   const { input } = req.body;
-
-  const metadata = new grpc.Metadata();
-  metadata.set('authorization', `Key ${process.env.CLARIFAI_PAT}`);
 
   stub.PostModelOutputs(
     {
