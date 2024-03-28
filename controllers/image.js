@@ -23,13 +23,13 @@ export const handleApiCall = (req, res) => {
     (err, response) => {
       if (err) {
         console.log('Error: ' + err);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json('Internal Clarifai Server Error');
         return;
       }
 
       if (response.status.code !== 10000) {
         console.log('Received failed status: ' + response.status.description + '\n' + response.status.details);
-        res.status(400).json({ error: 'Bad Request' });
+        res.status(400).json(response.status.description);
         return;
       }
       res.json(response);
